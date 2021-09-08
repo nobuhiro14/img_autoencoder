@@ -90,20 +90,24 @@ class decoder(nn.Module):
         super(decoder, self).__init__()
         self.lin1 = nn.Linear(16,32)
         self.reshape = torch.reshape
-        self.transes = []
-        self.acts = []
-        self.norms = []
-        for i in range(3):
-            if i ==0:
-                self.transes.append(nn.ConvTranspose2d(2,256,kernel_size=3,stride=1))
-            else :
-                self.transes.append(nn.ConvTranspose2d(256,256,kernel_size=3,stride=1))
-            self.acts.append(nn.ELU())
-            self.norms.append(nn.BatchNorm2d(256))
-        self.trans1 = nn.ConvTranspose2d(256,256,kernel_size=7,stride=1)
+
+        self.trans1 = nn.ConvTranspose2d(2,256,kernel_size=3,stride=1)
+        self.norm1  = nn.BatchNorm2d(256)
         self.act1 = nn.ELU()
-        self.norm1 = nn.BatchNorm2d(256)
-        self.trans2  = nn.ConvTranspose2d(256,3,kernel_size=2,stride=2)
+
+        self.trans2 = nn.ConvTranspose2d(256,256,kernel_size=3,stride=1)
+        self.norm2  = nn.BatchNorm2d(256)
+        self.act2 = nn.ELU()
+
+        self.trans3 = nn.ConvTranspose2d(256,256,kernel_size=3,stride=1)
+        self.norm3  = nn.BatchNorm2d(256)
+        self.act3 = nn.ELU()
+
+        self.trans4 = nn.ConvTranspose2d(256,256,kernel_size=7,stride=1)
+        self.norm4 = nn.BatchNorm2d(256)
+        self.act4 = nn.ELU()
+
+        self.trans5  = nn.ConvTranspose2d(256,3,kernel_size=2,stride=2)
         self.tan = torch.tanh
         self.reshape2 = torch.reshape
 
@@ -116,11 +120,8 @@ class decoder(nn.Module):
         s = self.lin1(s)
         mbs,le = s.shape
         s = self.reshape(s,(mbs,2,4,-1))
-        for i in range(3):
-            s = self.transes[i](s)
-            s = self.norms[i](s)
-            s = self.acts[i](s)
-        s = compose(self.act1,self.norm1,self.trans1)(s)
-        s = compose(self.tan,self.trans2)(s)
+        s = compose(self.act2,self.norm2,self.trans2,self.act1,self.norm1,self.trans1)(s)
+        s = compose(self.act4,self.norm4,self.trans4,self.act3,self.norm3,self.trans3)(s)
+        s = compose(self.tan,self.trans5)(s)
         #s = compose(self.tan,self.trans2,self.norm1,self.act1,self.trans1)(s)
         return s
