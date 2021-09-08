@@ -15,6 +15,8 @@ def train(batch,sigma,epoch,learn_rate):
     loader = load_cifar10(batch)
     enc = encoder()
     dec = decoder()
+    enc.cuda()
+    dec.cuda()
     loss_func = nn.MSELoss()
     enc_opt= optim.Adam(enc.parameters(), lr=learn_rate)
     dec_opt = optim.Adam(dec.parameters(),lr = learn_rate)
