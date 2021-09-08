@@ -54,8 +54,8 @@ def valid(enc,dec,batch,sigma):
     if torch.cuda.is_available():
         enc.cuda()
         dec.cuda()
-    enc = enc.to(device)
-    dec = dec.to(device)
+    enc.to(device)
+    dec.to(device)
     enc.eval()
     dec.eval()
     with torch.no_grad():
@@ -63,7 +63,7 @@ def valid(enc,dec,batch,sigma):
             img = img.to(device)
             enc.zero_grad()
             dec.zero_grad()
-            enc_sig = enc(m)
+            enc_sig = enc(img)
             shape = enc_sig.shape
             gauss = torch.normal(torch.zeros(shape),std=sigma)
             gauss = gauss.to(device)
