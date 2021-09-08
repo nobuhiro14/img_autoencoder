@@ -13,8 +13,9 @@ from dataset import load_cifar10
 def train(batch,sigma,epoch,learn_rate):
 
     loader = load_cifar10(batch)
-    enc = encoder()
-    dec = decoder()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    enc = encoder().to(device)
+    dec = decoder().to(device)
     enc.cuda()
     dec.cuda()
     loss_func = nn.MSELoss()
@@ -25,7 +26,7 @@ def train(batch,sigma,epoch,learn_rate):
         enc.train()
         dec.train()
         for img,_ in loader["train"]:
-
+            img = img.to(device)
             enc_opt.zero_grad()
             dec_opt.zero_grad()
             enc_sig = enc(img)
@@ -46,8 +47,12 @@ def train(batch,sigma,epoch,learn_rate):
 def valid(enc,dec,batch,sigma):
     loss_func = nn.MSELoss()
     loader = load_cifar10(batch)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    enc.eval()
+    dec.eval()
     with torch.no_grad():
         for img,_ in loader["valid"]:
+            img = img.to(device)
             enc.zero_grad()
             dec.zero_grad()
             enc_sig = enc(m)
