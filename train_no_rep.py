@@ -54,6 +54,8 @@ def valid(enc,dec,batch,sigma):
     if torch.cuda.is_available():
         enc.cuda()
         dec.cuda()
+    enc = enc.to(device)
+    dec = dec.to(device)
     enc.eval()
     dec.eval()
     with torch.no_grad():
