@@ -29,7 +29,9 @@ def train(batch,sigma,epoch,learn_rate):
             dec_opt.zero_grad()
             enc_sig = enc(img)
             shape = enc_sig.shape
-            noisy = enc_sig + torch.normal(torch.zeros(shape),std=sigma)
+            gauss = torch.normal(torch.zeros(shape),std=sigma)
+            gauss = gauss.to(device)
+            noisy = enc_sig + gauss
             m_hat = dec(noisy)
             loss = loss_func(m_hat, img)
             loss.backward()
@@ -55,7 +57,9 @@ def valid(enc,dec,batch,sigma):
             dec.zero_grad()
             enc_sig = enc(m)
             shape = enc_sig.shape
-            noisy1 = enc_sig + torch.normal(torch.zeros(shape),std=sigma)
+            gauss = torch.normal(torch.zeros(shape),std=sigma)
+            gauss = gauss.to(device)
+            noisy1 = enc_sig + gauss
             m_hat = dec(noisy1)
 
     score = 0
