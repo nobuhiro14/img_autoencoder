@@ -19,7 +19,7 @@ def train(batch,sigma,epoch,learn_rate):
     if torch.cuda.is_available():
         enc.cuda()
         dec.cuda()
-    loss_func = nn.MSELoss()
+    loss_func = nn.MSELoss().to(device)
     enc_opt= optim.Adam(enc.parameters(), lr=learn_rate)
     dec_opt = optim.Adam(dec.parameters(),lr = learn_rate)
 
