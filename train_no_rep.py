@@ -34,8 +34,8 @@ def train(batch,sigma,epoch,learn_rate):
             loss.backward()
             enc_opt.step()
             dec_opt.step()
-            if i % 1000 == 0:
-                print(i, loss.item())
+        if i % 1000 == 0:
+            print(i, loss.item())
 
 
 
