@@ -90,19 +90,16 @@ class decoder(nn.Module):
         super(decoder, self).__init__()
         self.lin1 = nn.Linear(16,32)
         self.reshape = torch.reshape
-        transes = []
-        acts = []
-        norms = []
+        self.transes = []
+        self.acts = []
+        self.norms = []
         for i in range(3):
             if i ==0:
-                transes.append(nn.ConvTranspose2d(2,256,kernel_size=3,stride=1))
+                self.transes.append(nn.ConvTranspose2d(2,256,kernel_size=3,stride=1))
             else :
-                transes.append(nn.ConvTranspose2d(256,256,kernel_size=3,stride=1))
-            acts.append(nn.ELU())
-            norms.append(nn.BatchNorm2d(256))
-        self.transes = transes
-        self.acts = acts
-        self.norms = norms
+                self.transes.append(nn.ConvTranspose2d(256,256,kernel_size=3,stride=1))
+            self.acts.append(nn.ELU())
+            self.append(nn.BatchNorm2d(256))
         self.trans1 = nn.ConvTranspose2d(256,256,kernel_size=7,stride=1)
         self.act1 = nn.ELU()
         self.norm1 = nn.BatchNorm2d(256)
