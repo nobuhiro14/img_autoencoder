@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
 
 from model import encoder, decoder, repeater
 from dataset import load_cifar10
@@ -53,6 +54,12 @@ def valid(enc,dec,batch,sigma):
             m_hat = dec(noisy1)
 
     score = 0
+    before = img[0,:,:,:].detach().numpy()
+    after = m_hat[0,:,:,:].detach().numpy()
+    before = Image.fromarray(before)
+    after  =Image.fromarray(after)
+    before.save("before.png")
+    after.save("after.png")
     m_np = m.detach().numpy()
     m_hat_np = m_hat.detach().numpy()
     for ans , res in zip(m_np,m_hat_np):
