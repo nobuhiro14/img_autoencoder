@@ -51,6 +51,9 @@ def valid(enc,dec,batch,sigma):
     loss_func = nn.MSELoss()
     loader = load_cifar10(batch)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        enc.cuda()
+        dec.cuda()
     enc.eval()
     dec.eval()
     with torch.no_grad():
