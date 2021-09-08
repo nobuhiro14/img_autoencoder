@@ -16,7 +16,7 @@ def train(batch,sigma,epoch,learn_rate):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     enc = encoder().to(device)
     dec = decoder().to(device)
-    
+
     loss_func = nn.MSELoss().to(device)
     enc_opt= optim.Adam(enc.parameters(), lr=learn_rate)
     dec_opt = optim.Adam(dec.parameters(),lr = learn_rate)
@@ -38,7 +38,7 @@ def train(batch,sigma,epoch,learn_rate):
             loss.backward()
             enc_opt.step()
             dec_opt.step()
-        if i % 1000 == 0:
+        if i % 10 == 0:
             print(i, loss.item())
 
 
