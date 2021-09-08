@@ -99,7 +99,7 @@ class decoder(nn.Module):
             else :
                 self.transes.append(nn.ConvTranspose2d(256,256,kernel_size=3,stride=1))
             self.acts.append(nn.ELU())
-            self.append(nn.BatchNorm2d(256))
+            self.norms.append(nn.BatchNorm2d(256))
         self.trans1 = nn.ConvTranspose2d(256,256,kernel_size=7,stride=1)
         self.act1 = nn.ELU()
         self.norm1 = nn.BatchNorm2d(256)
