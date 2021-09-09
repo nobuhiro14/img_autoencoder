@@ -54,7 +54,7 @@ def valid(enc,dec,batch,sigma):
     enc.eval()
     dec.eval()
     with torch.no_grad():
-        for img,_ in loader["valid"]:
+        for img,_ in loader["test"]:
             img = img.to(device)
             enc.zero_grad()
             dec.zero_grad()
