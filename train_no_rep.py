@@ -74,20 +74,12 @@ def valid(enc,dec,batch,sigma):
     after  =Image.fromarray(after)
     before.save("before.png")
     after.save("after.png")
-    m_np = m.detach().numpy()
-    m_hat_np = m_hat.detach().numpy()
-    for ans , res in zip(m_np,m_hat_np):
-      if np.where(ans ==1) == np.where(res == np.max(res)):
-        score +=1
-    mbs ,_ = m_hat.shape
-    print(score/mbs)
-    print(loss_func(m,m_hat))
-    x_re = enc_sig[:, 0,:].detach().numpy()
-    x_im = enc_sig[:, 1,:].detach().numpy()
-    n_re = noisy1[:, 0,:].detach().numpy()
-    n_im = noisy1[:, 1,:].detach().numpy()
-    y_re = noisy2[:, 0,:].detach().numpy()
-    y_im = noisy2[:, 1,:].detach().numpy()
+    x_re = enc_sig[:, 0,:].detach().to("cpu").numpy()
+    x_im = enc_sig[:, 1,:].detach().to("cpu").numpy()
+    n_re = noisy1[:, 0,:].detach().to("cpu").numpy()
+    n_im = noisy1[:, 1,:].detach().to("cpu").numpy()
+    y_re = noisy2[:, 0,:].detach().to("cpu").numpy()
+    y_im = noisy2[:, 1,:].detach().to("cpu").numpy()
     x_amp = np.unique(x_re**2 + x_im**2)
     m_rep = np.unique(m_re**2+m_im**2)
     print(f"encoder sig points: {x_amp.shape}")
