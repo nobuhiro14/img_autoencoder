@@ -66,8 +66,8 @@ def valid(enc,dec,batch,sigma):
             m_hat = dec(noisy1)
 
     score = 0
-    before = img[0,:,:,:].detach().numpy()
-    after = m_hat[0,:,:,:].detach().numpy()
+    before = img[0,:,:,:].to("cpu").detach().numpy()
+    after = m_hat[0,:,:,:].to("cpu").detach().numpy()
     before = Image.fromarray(before)
     after  =Image.fromarray(after)
     before.save("before.png")
