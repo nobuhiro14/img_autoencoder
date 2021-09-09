@@ -79,9 +79,7 @@ def valid(enc,dec,batch,sigma):
     n_re = noisy1[:, 0,:].detach().to("cpu").numpy()
     n_im = noisy1[:, 1,:].detach().to("cpu").numpy()
     x_amp = np.unique(x_re**2 + x_im**2)
-    m_rep = np.unique(m_re**2+m_im**2)
     print(f"encoder sig points: {x_amp.shape}")
-    print(f"repeater sig points: {m_rep.shape}")
     print(f"enc points :{x_amp}")
     fig = plt.figure(figsize=(5,5))
     plt.xlim([-3,3])
@@ -97,4 +95,3 @@ def valid(enc,dec,batch,sigma):
     plt.gca().set_aspect('equal', adjustable='box')
     plt.scatter(n_re, n_im)
     fig.savefig("noisy1.png")
-    
