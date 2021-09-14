@@ -57,7 +57,8 @@ def valid(enc,dec,batch,sigma):
     dec.to(device)
     enc.eval()
     dec.eval()
-    psnr = []
+    psnr = 0
+    count = 0
     with torch.no_grad():
         for img,_ in loader["test"]:
             img = img.to(device)
@@ -69,9 +70,11 @@ def valid(enc,dec,batch,sigma):
             gauss = gauss.to(device)
             noisy1 = enc_sig + gauss
             m_hat = dec(noisy1)
-            psnr = get_psnr(img,m_hat)
+            psnr += get_psnr(img,m_hat)
+            count +=1
 
-
+    ave_psnr = psnr/count
+    print(f"PSNR : {ave_psnr}")
     score = 0
     before = img[0,:,:,:].to("cpu").detach().numpy()
     after = m_hat[0,:,:,:].to("cpu").detach().numpy()
