@@ -13,19 +13,19 @@ def compose(*func):
 
 
 class encoder(nn.Module):
-    def __init__(self):
+    def __init__(self,m):
         super(encoder, self).__init__()
-        self.conv1 = nn.Conv2d(3,256,kernel_size=5,stride=2) # 符号化器用レイヤー
-        self.norm1 = nn.BatchNorm2d(256)
+        self.conv1 = nn.Conv2d(3,m,kernel_size=5,stride=2) # 符号化器用レイヤー
+        self.norm1 = nn.BatchNorm2d(m)
         self.act1 = nn.ELU()
-        self.conv2 = nn.Conv2d(256,256,kernel_size=3,stride=2) # 符号化器用レイヤ-
-        self.norm2 = nn.BatchNorm2d(256)
+        self.conv2 = nn.Conv2d(m,m,kernel_size=3,stride=2) # 符号化器用レイヤ-
+        self.norm2 = nn.BatchNorm2d(m)
         self.act2 = nn.ELU()
-        self.conv3 = nn.Conv2d(256,256,kernel_size=3,stride=1)
-        self.norm3 = nn.BatchNorm2d(256)
+        self.conv3 = nn.Conv2d(m,m,kernel_size=3,stride=1)
+        self.norm3 = nn.BatchNorm2d(m)
         self.act3 = nn.ELU()
         self.reshape = torch.reshape
-        self.conv4 = nn.Conv1d(256,32,kernel_size=1,stride=1)
+        self.conv4 = nn.Conv1d(m,32,kernel_size=1,stride=1)
         self.softmax = nn.Softmax(dim=2)
         self.conv5 = nn.Conv1d(32,2,kernel_size=1,stride=1)
 
@@ -86,28 +86,28 @@ class repeater(nn.Module):
 
 
 class decoder(nn.Module):
-    def __init__(self):
+    def __init__(self,m):
         super(decoder, self).__init__()
         self.lin1 = nn.Linear(16,32)
         self.reshape = torch.reshape
 
-        self.trans1 = nn.ConvTranspose2d(2,256,kernel_size=3,stride=1)
-        self.norm1  = nn.BatchNorm2d(256)
+        self.trans1 = nn.ConvTranspose2d(2,m,kernel_size=3,stride=1)
+        self.norm1  = nn.BatchNorm2d(m)
         self.act1 = nn.ELU()
 
-        self.trans2 = nn.ConvTranspose2d(256,256,kernel_size=3,stride=1)
-        self.norm2  = nn.BatchNorm2d(256)
+        self.trans2 = nn.ConvTranspose2d(m,m,kernel_size=3,stride=1)
+        self.norm2  = nn.BatchNorm2d(m)
         self.act2 = nn.ELU()
 
-        self.trans3 = nn.ConvTranspose2d(256,256,kernel_size=3,stride=1)
-        self.norm3  = nn.BatchNorm2d(256)
+        self.trans3 = nn.ConvTranspose2d(m,m,kernel_size=3,stride=1)
+        self.norm3  = nn.BatchNorm2d(m)
         self.act3 = nn.ELU()
 
-        self.trans4 = nn.ConvTranspose2d(256,256,kernel_size=7,stride=1)
-        self.norm4 = nn.BatchNorm2d(256)
+        self.trans4 = nn.ConvTranspose2d(m,m,kernel_size=7,stride=1)
+        self.norm4 = nn.BatchNorm2d(m)
         self.act4 = nn.ELU()
 
-        self.trans5  = nn.ConvTranspose2d(256,3,kernel_size=2,stride=2)
+        self.trans5  = nn.ConvTranspose2d(m,3,kernel_size=2,stride=2)
         self.tan = torch.tanh
         self.reshape2 = torch.reshape
 

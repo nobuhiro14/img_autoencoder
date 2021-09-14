@@ -9,13 +9,17 @@ from PIL import Image
 from model import encoder, decoder, repeater
 from dataset import load_cifar10
 
+def get_psnr(est,corr):
+    mse = torch.sum(torch.sum((est-corr)**2 ))
+    peak = 1
+    psnr = 20 * torch.log(1/mse)
 
-def train(batch,sigma,epoch,learn_rate):
+def train(batch,sigma,epoch,learn_rate,m):
 
     loader = load_cifar10(batch)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    enc = encoder().to(device)
-    dec = decoder().to(device)
+    enc = encoder(m).to(device)
+    dec = decoder(m).to(device)
 
     loss_func = nn.MSELoss().to(device)
     enc_opt= optim.Adam(enc.parameters(), lr=learn_rate)
@@ -53,6 +57,7 @@ def valid(enc,dec,batch,sigma):
     dec.to(device)
     enc.eval()
     dec.eval()
+    psnr = []
     with torch.no_grad():
         for img,_ in loader["test"]:
             img = img.to(device)
@@ -64,6 +69,8 @@ def valid(enc,dec,batch,sigma):
             gauss = gauss.to(device)
             noisy1 = enc_sig + gauss
             m_hat = dec(noisy1)
+            psnr = get_psnr(img,m_hat)
+
 
     score = 0
     before = img[0,:,:,:].to("cpu").detach().numpy()

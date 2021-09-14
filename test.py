@@ -11,8 +11,7 @@ from train_no_rep import train,valid
 class Option():
     def __init__(self):
         parser = ArgumentParser()
-        parser.add_argument("-one_hot",type = int,default=4)
-        parser.add_argument("-hidden", type = int,default=10)
+        parser.add_argument("-hidden",type = int,default=64)
         parser.add_argument("-channel",type = int,default=1)
         parser.add_argument("-batch",type = int,default=100)
         parser.add_argument("-gauss",type = float,default=0.1)
@@ -28,8 +27,7 @@ class Option():
 
 if __name__ == "__main__":
     args = Option().get_param()
-    m = args.one_hot
-    hidden = args.hidden
+    m= args.hidden
     n = args.channel
     batch = args.batch
     sigma = args.gauss
@@ -41,5 +39,5 @@ if __name__ == "__main__":
     #    enc, rep ,dec = train_rep(m,hidden,n,batch,sigma,ep,lr)
     #    valid_rep(enc,rep,dec,m,batch,sigma)
     #else :
-    enc, dec = train(batch,sigma,ep,lr)
+    enc, dec = train(batch,sigma,ep,lr,m)
     valid(enc,dec,batch,sigma)
