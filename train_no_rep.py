@@ -13,6 +13,7 @@ def get_psnr(est,corr):
     mse = torch.sum(torch.sum((est-corr)**2 ))
     peak = 1
     psnr = 20 * torch.log(1/mse)
+    return psnr
 
 def train(batch,sigma,epoch,learn_rate,m):
 
