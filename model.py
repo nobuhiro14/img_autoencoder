@@ -125,3 +125,89 @@ class decoder(nn.Module):
         s = compose(self.tan,self.trans5)(s)
         #s = compose(self.tan,self.trans2,self.norm1,self.act1,self.trans1)(s)
         return s
+
+
+class encoder_pool(nn.Module):
+    def __init__(self,m):
+        super(encoder_pool, self).__init__()
+        self.convs = []
+        self.convs.append(nn.Conv2d(3,m,kernel_size=3,padding=(1,1)))
+        self.convs.append(nn.Conv2d(m,m//2,kernel_size=3,padding=(1,1)))
+        self.convs.append(nn.Conv2d(m//2,m//4,kernel_size=3,padding=(1,1)))
+        self.acts = []
+        self.pools  = []
+        for i in range(3):
+            self.acts.append(nn.ELU())
+            self.pools.append(nn.MaxPool2d(kernel_size=2))
+        self.norms  = []
+        self.norms.append(nn.BatchNorm2d(m))
+        self.norms.append(nn.BatchNorm2d(m//2))
+        self.norms.append(nn.BatchNorm2d(m//4))
+        self.reshape = torch.reshape
+        self.conv1d_1 = nn.Conv1d(m//4,32,kernel_size=1,stride=1)
+        self.softmax = nn.Softmax(dim=2)
+        self.conv1d_2 = nn.Conv1d(32,2,kernel_size=1,stride=1)
+
+    def normalize(self, x): # 送信信号の正規化
+        # 等電力制約
+        #norm = torch.norm(x,dim=1).view(mbs, 1).expand(-1, 2) # Normalization layer
+        #x = x/norm
+        # 平均エネルギー制約
+        mbs ,_,_ = x.shape
+        norm = torch.sqrt((x.norm(dim=1)**2).sum()/mbs)
+        x = x/norm
+        return x
+
+
+    def forward(self, m):
+        s = compose(self.pools[0],self.acts[0],self.norms[0],self.convs[0])(m)
+        s = compose(self.pools[1],self.acts[1],self.norms[1],self.convs[1])(s)
+        s = compose(self.pools[2],self.acts[2],self.norms[2],self.convs[2])(s)
+        mbs, ch ,_,_ = s.shape
+        s = self.reshape(s,(mbs,ch,-1))
+        s = compose(self.conv1d_2,self.softmax,self.conv1d_1)(s)
+        y = self.normalize(s) # normalization
+        return y
+
+
+
+class decoder_pool(nn.Module):
+    def __init__(self,m):
+        super(decoder_pool, self).__init__()
+        self.lin1 = nn.Linear(16,32)
+        self.reshape = torch.reshape
+
+        self.convs = []
+        self.convs.append(nn.Conv2d(2,m//2,kernel_size=3,padding=(1,1)))
+        self.convs.append(nn.Conv2d(m//2,m,kernel_size=3,padding=(1,1)))
+        self.convs.append(nn.Conv2d(m,3,kernel_size=3,padding=(1,1)))
+        self.acts = []
+        self.ups  = []
+        for i in range(3):
+            self.acts.append(nn.ELU())
+            self.ups.append(nn.Upsample(scale_factor=2))
+
+        self.norms  = []
+        self.norms.append(nn.BatchNorm2d(m//2))
+        self.norms.append(nn.BatchNorm2d(m))
+        self.norms.append(nn.BatchNorm2d(3))
+
+
+        self.tan = torch.tanh
+        self.reshape2 = torch.reshape
+
+    def detection(self,x):
+        y = x[:,0,:]**2 + x[:,1,:]**2
+        return y
+
+    def forward(self, m):
+        s = self.detection(m)
+        s = self.lin1(s)
+        mbs,le = s.shape
+        s = self.reshape(s,(mbs,2,4,-1))
+        s = compose(self.ups[0],self.acts[0],self.norms[0],self.convs[0])(s)
+        s = compose(self.ups[1],self.acts[1],self.norms[1],self.convs[1])(s)
+        s = compose(self.ups[2],self.acts[2],self.norms[2],self.convs[2])(s)
+        s =self.tan(s)
+        #s = compose(self.tan,self.trans2,self.norm1,self.act1,self.trans1)(s)
+        return s
