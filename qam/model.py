@@ -201,10 +201,12 @@ class decoder_pool(nn.Module):
         return y
 
     def forward(self, m):
-
+        mbs,le,_ = m.shape
+        s = self.reshape(m,(mbs,2,4,-1))
+        #print(self.convs.shape)
         #s = self.convs[0].to("cuda")(s)
 
-        s = compose(self.ups[0],self.acts[0],self.norms[0],self.convs[0])(m)
+        s = compose(self.ups[0],self.acts[0],self.norms[0],self.convs[0])(s)
         s = compose(self.ups[1],self.acts[1],self.norms[1],self.convs[1])(s)
         s = compose(self.ups[2],self.acts[2],self.norms[2],self.convs[2])(s)
         s =self.tan(s)
