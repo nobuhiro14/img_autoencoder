@@ -60,7 +60,7 @@ def valid(enc,dec,batch,sigma):
     dec.eval()
     psnr = 0
     count = 0
-    with torch.no_grad():
+    with torch.inference_mode():
         for img,_ in loader["test"]:
             img = img.to(device)
             enc.zero_grad()
@@ -74,6 +74,10 @@ def valid(enc,dec,batch,sigma):
             psnr += get_psnr(img,m_hat)
             count +=1
 
+    model_path = 'model_enc.pth'
+    torch.save(enc.state_dict(), model_path)
+    model_path = 'model_dec.pth'
+    torch.save(dec.state_dict(), model_path)
     ave_psnr = psnr/count
     print(f"PSNR : {ave_psnr}")
     score = 0
