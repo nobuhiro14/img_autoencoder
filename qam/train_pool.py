@@ -82,8 +82,10 @@ def valid(enc,dec,batch,sigma):
     ave_psnr = psnr/count
     print(f"PSNR : {ave_psnr}")
     score = 0
-    before = img[0,:,:,:].to("cpu").detach().numpy()
-    after = m_hat[0,:,:,:].to("cpu").detach().numpy()
+    before = img[0,:,:,:].to("cpu").detach().numpy()  * 0.5 + 0.5
+    after = m_hat[0,:,:,:].to("cpu").detach().numpy()  * 0.5 + 0.5
+    before = before * 255
+    after = after * 255
     before = before.transpose(2,1,0).astype(np.uint8)
     after = after.transpose(2,1,0).astype(np.uint8)
 
