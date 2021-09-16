@@ -130,23 +130,24 @@ class decoder(nn.Module):
 class encoder_pool(nn.Module):
     def __init__(self,m):
         super(encoder_pool, self).__init__()
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.convs = []
-        self.convs.append(nn.Conv2d(3,m,kernel_size=3,padding=(1,1)))
-        self.convs.append(nn.Conv2d(m,m//2,kernel_size=3,padding=(1,1)))
-        self.convs.append(nn.Conv2d(m//2,m//4,kernel_size=3,padding=(1,1)))
+        self.convs.append(nn.Conv2d(3,m,kernel_size=3,padding=(1,1)).to(device))
+        self.convs.append(nn.Conv2d(m,m//2,kernel_size=3,padding=(1,1)).to(device))
+        self.convs.append(nn.Conv2d(m//2,m//4,kernel_size=3,padding=(1,1)).to(device))
         self.acts = []
         self.pools  = []
         for i in range(3):
-            self.acts.append(nn.ELU())
-            self.pools.append(nn.MaxPool2d(kernel_size=2))
+            self.acts.append(nn.ELU().to(device))
+            self.pools.append(nn.MaxPool2d(kernel_size=2).to(device))
         self.norms  = []
-        self.norms.append(nn.BatchNorm2d(m))
-        self.norms.append(nn.BatchNorm2d(m//2))
-        self.norms.append(nn.BatchNorm2d(m//4))
+        self.norms.append(nn.BatchNorm2d(m).to(device))
+        self.norms.append(nn.BatchNorm2d(m//2).to(device))
+        self.norms.append(nn.BatchNorm2d(m//4).to(device))
         self.reshape = torch.reshape
-        self.conv1d_1 = nn.Conv1d(m//4,32,kernel_size=1,stride=1)
-        self.softmax = nn.Softmax(dim=2)
-        self.conv1d_2 = nn.Conv1d(32,2,kernel_size=1,stride=1)
+        self.conv1d_1 = nn.Conv1d(m//4,32,kernel_size=1,stride=1).to(device)
+        self.softmax = nn.Softmax(dim=2).to(device)
+        self.conv1d_2 = nn.Conv1d(32,2,kernel_size=1,stride=1).to(device)
 
     def normalize(self, x): # 送信信号の正規化
         # 等電力制約
@@ -174,27 +175,29 @@ class encoder_pool(nn.Module):
 class decoder_pool(nn.Module):
     def __init__(self,m):
         super(decoder_pool, self).__init__()
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.lin1 = nn.Linear(16,32)
         self.reshape = torch.reshape
-
+        
         self.convs = []
-        self.convs.append(nn.Conv2d(2,m//2,kernel_size=3,padding=(1,1)))
-        self.convs.append(nn.Conv2d(m//2,m,kernel_size=3,padding=(1,1)))
-        self.convs.append(nn.Conv2d(m,3,kernel_size=3,padding=(1,1)))
+        self.convs.append(nn.Conv2d(2,m//2,kernel_size=3,padding=(1,1)).to(device))
+        self.convs.append(nn.Conv2d(m//2,m,kernel_size=3,padding=(1,1)).to(device))
+        self.convs.append(nn.Conv2d(m,3,kernel_size=3,padding=(1,1)).to(device))
         self.acts = []
         self.ups  = []
         for i in range(3):
-            self.acts.append(nn.ELU())
-            self.ups.append(nn.Upsample(scale_factor=2))
+            self.acts.append(nn.ELU().to(device))
+            self.ups.append(nn.Upsample(scale_factor=2).to(device))
 
         self.norms  = []
-        self.norms.append(nn.BatchNorm2d(m//2))
-        self.norms.append(nn.BatchNorm2d(m))
-        self.norms.append(nn.BatchNorm2d(3))
+        self.norms.append(nn.BatchNorm2d(m//2).to(device))
+        self.norms.append(nn.BatchNorm2d(m).to(device))
+        self.norms.append(nn.BatchNorm2d(3).to(device))
 
 
         self.tan = torch.tanh
         self.reshape2 = torch.reshape
+
 
     def detection(self,x):
         y = x[:,0,:]**2 + x[:,1,:]**2
@@ -205,6 +208,9 @@ class decoder_pool(nn.Module):
         s = self.lin1(s)
         mbs,le = s.shape
         s = self.reshape(s,(mbs,2,4,-1))
+        #print(self.convs.shape)
+        #s = self.convs[0].to("cuda")(s)
+        
         s = compose(self.ups[0],self.acts[0],self.norms[0],self.convs[0])(s)
         s = compose(self.ups[1],self.acts[1],self.norms[1],self.convs[1])(s)
         s = compose(self.ups[2],self.acts[2],self.norms[2],self.convs[2])(s)
