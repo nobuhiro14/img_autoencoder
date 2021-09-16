@@ -116,8 +116,10 @@ class decoder(nn.Module):
         return y
 
     def forward(self, m):
+        mbs,le,_ = m.shape
+        s = self.reshape(m,(mbs,2,4,-1))
 
-        s = compose(self.act2,self.norm2,self.trans2,self.act1,self.norm1,self.trans1)(m)
+        s = compose(self.act2,self.norm2,self.trans2,self.act1,self.norm1,self.trans1)(s)
         s = compose(self.act4,self.norm4,self.trans4,self.act3,self.norm3,self.trans3)(s)
         s = compose(self.tan,self.trans5)(s)
         #s = compose(self.tan,self.trans2,self.norm1,self.act1,self.trans1)(s)
