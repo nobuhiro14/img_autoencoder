@@ -84,10 +84,9 @@ def valid(enc,dec,batch,sigma):
     score = 0
     before = img[0,:,:,:].to("cpu").detach().numpy()
     after = m_hat[0,:,:,:].to("cpu").detach().numpy()
-    #before = before.transpose(2,1,0).astype(np.uint8)
-    #after = after.transpose(2,1,0).astype(np.uint8)
-    before = before.astype(np.uint8)
-    after = after.astype(np.uint8)
+    before = before.transpose(2,1,0).astype(np.uint8)
+    after = after.transpose(2,1,0).astype(np.uint8)
+    
     before = Image.fromarray(before)
     after  =Image.fromarray(after)
     before.save("before.png")
