@@ -11,8 +11,8 @@ from dataset import load_cifar10
 
 def get_psnr(est,corr):
     mse = torch.sum(torch.sum((est-corr)**2 ))
-    peak = 1
-    psnr = 20 * torch.log(1/mse)
+    peak = 255
+    psnr = 20 * torch.log(peak/mse)
     return psnr
 
 def train(batch,sigma,epoch,learn_rate,m):
@@ -86,7 +86,7 @@ def valid(enc,dec,batch,sigma):
     after = m_hat[0,:,:,:].to("cpu").detach().numpy()
     before = before.transpose(2,1,0).astype(np.uint8)
     after = after.transpose(2,1,0).astype(np.uint8)
-    
+
     before = Image.fromarray(before)
     after  =Image.fromarray(after)
     before.save("before.png")
