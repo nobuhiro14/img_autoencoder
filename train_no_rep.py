@@ -109,6 +109,8 @@ def test(enc,dec,batch,sigma):
             count +=1
 
     model_path = 'model_enc.pth'
+    enc.to("cpu")
+    dec.to("cpu")
     torch.save(enc.state_dict(), model_path)
     model_path = 'model_dec.pth'
     torch.save(dec.state_dict(), model_path)
