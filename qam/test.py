@@ -40,4 +40,4 @@ if __name__ == "__main__":
     #    valid_rep(enc,rep,dec,m,batch,sigma)
     #else :
     enc, dec = train(batch,sigma,ep,lr,m)
-    valid(enc,dec,batch,sigma)
+    test(enc,dec,batch,sigma)

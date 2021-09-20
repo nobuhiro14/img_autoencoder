@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 from functools import reduce
-
+from pytorch_gdn import GDN
 def compose(*func):
   def sub_compose(f, g):
     return lambda x: f(g(x))
@@ -15,16 +15,17 @@ def compose(*func):
 class encoder(nn.Module):
     def __init__(self,m):
         super(encoder, self).__init__()
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.conv1 = nn.Conv2d(3,m,kernel_size=5,stride=2) # 符号化器用レイヤー
-        self.norm1 = nn.BatchNorm2d(m)
+        self.norm1 = GDN(m,device)
         self.act1 = nn.ELU()
         self.conv2 = nn.Conv2d(m,m,kernel_size=3,stride=2) # 符号化器用レイヤ-
-        self.norm2 = nn.BatchNorm2d(m)
+        self.norm2 = GDN(m,device)
         self.act2 = nn.ELU()
         self.conv3 = nn.Conv2d(m,32,kernel_size=3,stride=1)
-        self.norm3 = nn.BatchNorm2d(32)
+        self.norm3 = GDN(32,device)
         self.act3 = nn.ELU()
-        
+
 
 
 
@@ -41,8 +42,8 @@ class encoder(nn.Module):
 
     def forward(self, m):
         s = compose(self.act3,self.norm3,self.conv3,self.act2,self.norm2,self.conv2,self.act1,self.norm1,self.conv1)(m)
-        
-       
+
+
         return s
 
 class repeater(nn.Module):
@@ -111,7 +112,7 @@ class decoder(nn.Module):
         return y
 
     def forward(self, m):
-    
+
 
         s = compose(self.act2,self.norm2,self.trans2,self.act1,self.norm1,self.trans1)(m)
         s = compose(self.act4,self.norm4,self.trans4,self.act3,self.norm3,self.trans3)(s)
@@ -157,7 +158,7 @@ class encoder_pool(nn.Module):
         s = compose(self.pools[0],self.acts[0],self.norms[0],self.convs[0])(m)
         s = compose(self.pools[1],self.acts[1],self.norms[1],self.convs[1])(s)
         s = compose(self.pools[2],self.acts[2],self.norms[2],self.convs[2])(s)
-        
+
         return s
 
 
