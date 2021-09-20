@@ -13,21 +13,19 @@ def compose(*func):
 
 
 class encoder(nn.Module):
-    def __init__(self,m):
+    def __init__(self,m,ch):
         super(encoder, self).__init__()
+        self.ch = ch
         self.conv1 = nn.Conv2d(3,m,kernel_size=5,stride=2) # 符号化器用レイヤー
         self.norm1 = nn.BatchNorm2d(m)
         self.act1 = nn.ELU()
         self.conv2 = nn.Conv2d(m,m,kernel_size=3,stride=2) # 符号化器用レイヤ-
         self.norm2 = nn.BatchNorm2d(m)
         self.act2 = nn.ELU()
-        self.conv3 = nn.Conv2d(m,m,kernel_size=3,stride=1)
-        self.norm3 = nn.BatchNorm2d(m)
+        self.conv3 = nn.Conv2d(m,2*ch,kernel_size=3,stride=1)
+        self.norm3 = nn.BatchNorm2d(2*ch)
         self.act3 = nn.ELU()
         self.reshape = torch.reshape
-        self.conv4 = nn.Conv1d(m,32,kernel_size=1,stride=1)
-        self.softmax = nn.Softmax(dim=2)
-        self.conv5 = nn.Conv1d(32,2,kernel_size=1,stride=1)
 
 
 
@@ -44,9 +42,9 @@ class encoder(nn.Module):
 
     def forward(self, m):
         s = compose(self.act3,self.norm3,self.conv3,self.act2,self.norm2,self.conv2,self.act1,self.norm1,self.conv1)(m)
-        mbs, ch ,_,_ = s.shape
-        s = self.reshape(s,(mbs,ch,-1))
-        s = compose(self.conv5,self.softmax,self.conv4)(s)
+        mbs, _ ,_,_ = s.shape
+        s = self.reshape(s,(mbs,2,-1))
+
         y = self.normalize(s) # normalization
         return y
 
@@ -86,12 +84,12 @@ class repeater(nn.Module):
 
 
 class decoder(nn.Module):
-    def __init__(self,m):
+    def __init__(self,m,ch):
         super(decoder, self).__init__()
-        self.lin1 = nn.Linear(16,32)
+        self.ch = ch
         self.reshape = torch.reshape
 
-        self.trans1 = nn.ConvTranspose2d(2,m,kernel_size=3,stride=1)
+        self.trans1 = nn.ConvTranspose2d(2*ch,m,kernel_size=3,stride=1)
         self.norm1  = nn.BatchNorm2d(m)
         self.act1 = nn.ELU()
 
@@ -117,9 +115,8 @@ class decoder(nn.Module):
 
     def forward(self, m):
         s = self.detection(m)
-        s = self.lin1(s)
         mbs,le = s.shape
-        s = self.reshape(s,(mbs,2,4,-1))
+        s = self.reshape(s,(mbs,2*self.ch,4,-1))
         s = compose(self.act2,self.norm2,self.trans2,self.act1,self.norm1,self.trans1)(s)
         s = compose(self.act4,self.norm4,self.trans4,self.act3,self.norm3,self.trans3)(s)
         s = compose(self.tan,self.trans5)(s)
@@ -178,7 +175,7 @@ class decoder_pool(nn.Module):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.lin1 = nn.Linear(16,32)
         self.reshape = torch.reshape
-        
+
         self.convs = []
         self.convs.append(nn.Conv2d(2,m//2,kernel_size=3,padding=(1,1)).to(device))
         self.convs.append(nn.Conv2d(m//2,m,kernel_size=3,padding=(1,1)).to(device))
@@ -210,7 +207,7 @@ class decoder_pool(nn.Module):
         s = self.reshape(s,(mbs,2,4,-1))
         #print(self.convs.shape)
         #s = self.convs[0].to("cuda")(s)
-        
+
         s = compose(self.ups[0],self.acts[0],self.norms[0],self.convs[0])(s)
         s = compose(self.ups[1],self.acts[1],self.norms[1],self.convs[1])(s)
         s = compose(self.ups[2],self.acts[2],self.norms[2],self.convs[2])(s)

@@ -6,7 +6,7 @@ import numpy as np
 from argparse import ArgumentParser
 
 #from train_rep import train_rep,valid_rep
-from train_no_rep import train,valid
+from train_no_rep import train,valid,test
 
 class Option():
     def __init__(self):
@@ -28,7 +28,7 @@ class Option():
 if __name__ == "__main__":
     args = Option().get_param()
     m= args.hidden
-    n = args.channel
+    ch = args.channel
     batch = args.batch
     sigma = args.gauss
     ep = args.epoch
@@ -39,5 +39,5 @@ if __name__ == "__main__":
     #    enc, rep ,dec = train_rep(m,hidden,n,batch,sigma,ep,lr)
     #    valid_rep(enc,rep,dec,m,batch,sigma)
     #else :
-    enc, dec = train(batch,sigma,ep,lr,m)
-    valid(enc,dec,batch,sigma)
+    enc, dec = train(batch,sigma,ep,lr,m,ch)
+    test(enc,dec,batch,sigma)
