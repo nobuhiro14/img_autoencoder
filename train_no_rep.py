@@ -10,17 +10,19 @@ from model import encoder, decoder, repeater
 from dataset import load_cifar10
 
 def get_psnr(est,corr):
-    mse = torch.sum(torch.sum((est-corr)**2 ))
-    peak = 1
-    psnr = 20 * torch.log(1/mse)
+    batch,ch,x,y = est.shape
+    length = batch*ch*x*y
+    mse = torch.sum(torch.sum((est-corr)**2 ))/length
+    peak = torch.max(torch.max(corr))**2
+    psnr = 10 * torch.log(peak/mse)
     return psnr
 
-def train(batch,sigma,epoch,learn_rate,m):
+def train(batch,sigma,epoch,learn_rate,m,ch):
 
     loader = load_cifar10(batch)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    enc = encoder(m).to(device)
-    dec = decoder(m).to(device)
+    enc = encoder(m,ch).to(device)
+    dec = decoder(m,ch).to(device)
 
     loss_func = nn.MSELoss().to(device)
     enc_opt= optim.Adam(enc.parameters(), lr=learn_rate)
@@ -45,12 +47,44 @@ def train(batch,sigma,epoch,learn_rate,m):
             dec_opt.step()
         if i % 10 == 0:
             print(i, loss.item())
+            valid(enc,dec,batch,sigma)
 
 
 
     return enc, dec
 
 def valid(enc,dec,batch,sigma):
+    loss_func = nn.MSELoss()
+    loader = load_cifar10(batch)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    enc.to(device)
+    dec.to(device)
+    enc.eval()
+    dec.eval()
+    psnr = 0
+    count = 0
+    with torch.inference_mode():
+        for img,_ in loader["test"]:
+            img = img.to(device)
+            enc.zero_grad()
+            dec.zero_grad()
+            enc_sig = enc(img)
+            shape = enc_sig.shape
+            gauss = torch.normal(torch.zeros(shape),std=sigma)
+            gauss = gauss.to(device)
+            noisy1 = enc_sig + gauss
+            m_hat = dec(noisy1)
+            psnr += get_psnr(img,m_hat)
+            count +=1
+            loss = loss_func(m_hat,img)
+
+    ave_psnr = psnr/count
+    print(f"PSNR : {ave_psnr}")
+    losses = loss.item()
+    print(f"loss : {losses}")
+
+
+def test(enc,dec,batch,sigma):
     loss_func = nn.MSELoss()
     loader = load_cifar10(batch)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
