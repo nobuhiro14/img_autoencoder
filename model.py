@@ -89,7 +89,7 @@ class decoder(nn.Module):
         self.ch = ch
         self.reshape = torch.reshape
 
-        self.trans1 = nn.ConvTranspose2d(2*ch,m,kernel_size=3,stride=1)
+        self.trans1 = nn.ConvTranspose2d(ch,m,kernel_size=3,stride=1)
         self.norm1  = nn.BatchNorm2d(m)
         self.act1 = nn.ELU()
 
