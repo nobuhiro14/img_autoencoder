@@ -116,7 +116,7 @@ class decoder(nn.Module):
     def forward(self, m):
         s = self.detection(m)
         mbs,le = s.shape
-        s = self.reshape(s,(mbs,2*self.ch,4,-1))
+        s = self.reshape(s,(mbs,self.ch,4,-1))
         s = compose(self.act2,self.norm2,self.trans2,self.act1,self.norm1,self.trans1)(s)
         s = compose(self.act4,self.norm4,self.trans4,self.act3,self.norm3,self.trans3)(s)
         s = compose(self.tan,self.trans5)(s)
