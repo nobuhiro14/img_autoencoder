@@ -3,7 +3,7 @@ from torchvision import datasets, transforms
 
 
 def load_cifar10(batch=128):
-    trainval = datasets.CIFAR10datasets.CIFAR10('./data',
+    trainval = datasets.CIFAR10('./data',
                      train=True,
                      download=True,
                      transform=transforms.Compose([
