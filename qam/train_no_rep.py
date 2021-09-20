@@ -10,6 +10,10 @@ from model import encoder, decoder, repeater
 from dataset import load_cifar10
 
 def get_psnr(est,corr):
+    est = est * 0.5 + 0.5
+    est = est * 255
+    corr = corr * 0.5 + 0.5
+    corr = corr * 255
     mse = torch.sum(torch.sum((est-corr)**2 ))
     peak = 1
     psnr = 20 * torch.log(1/mse)
