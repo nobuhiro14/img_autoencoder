@@ -43,4 +43,4 @@ def load_cifar10(batch=128):
         shuffle=True
     )
 
-    return {'train': train_loader, 'val',val_loader,'test': test_loader}
+    return {'train': train_loader,'val': val_loader,'test': test_loader}
