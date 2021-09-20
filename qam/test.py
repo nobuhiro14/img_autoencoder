@@ -6,7 +6,7 @@ import numpy as np
 from argparse import ArgumentParser
 
 #from train_rep import train_rep,valid_rep
-from train_no_rep import train,valid
+from train_no_rep import train,valid,test
 
 class Option():
     def __init__(self):
