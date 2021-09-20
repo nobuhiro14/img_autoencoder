@@ -13,8 +13,9 @@ def get_psnr(est,corr):
     batch,ch,x,y = est.shape
     length = batch*ch*x*y
     mse = torch.sum(torch.sum((est-corr)**2 ))/length
-    peak = torch.max(torch.max(corr))
-    psnr = 20 * torch.log(peak/mse)
+    peak = torch.max(torch.max(corr))**2
+
+    psnr = 10 * torch.log(peak/mse)
     return psnr
 
 def train(batch,sigma,epoch,learn_rate,m):
