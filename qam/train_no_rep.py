@@ -116,6 +116,9 @@ def test(enc,dec,batch,sigma):
             psnr += get_psnr(img,m_hat)
             count +=1
 
+
+    enc.to("cpu")
+    dec.to("cpu")
     model_path = 'model_enc.pth'
     torch.save(enc.state_dict(), model_path)
     model_path = 'model_dec.pth'
