@@ -10,11 +10,17 @@ from model import encoder, decoder, repeater
 from dataset import load_cifar10
 
 def get_psnr(est,corr):
+    est = est.to("cpu").detach().numpy() * 0.5  + 0.5
+    est = est * 255
+    corr = corr.to("cpu").detach().numpy() * 0.5  + 0.5
+    corr = corr*255
+    est = est.astype(np.uint8)
+    corr = corr.astype(np.uint8)
     batch,ch,x,y = est.shape
     length = batch*ch*x*y
-    mse = torch.sum(torch.sum((est-corr)**2 ))/length
-    peak = torch.max(torch.max(corr))**2
-    psnr = 10 * torch.log(peak/mse)
+    mse = np.sum(np.sum((est-corr)**2 ))/length
+    peak = 255**2
+    psnr = 10 * np.log10(peak/mse)
     return psnr
 
 def train(batch,sigma,epoch,learn_rate,m):
