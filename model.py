@@ -24,7 +24,7 @@ class encoder(nn.Module):
         self.act2 = nn.ELU()
         self.conv3 = nn.Conv2d(m,2*ch,kernel_size=3,stride=1)
         self.norm3 = nn.BatchNorm2d(2*ch)
-        self.act3 = nn.ELU()
+        #self.act3 = nn.ELU()
         self.reshape = torch.reshape
 
 
@@ -41,7 +41,7 @@ class encoder(nn.Module):
 
 
     def forward(self, m):
-        s = compose(self.act3,self.norm3,self.conv3,self.act2,self.norm2,self.conv2,self.act1,self.norm1,self.conv1)(m)
+        s = compose(self.norm3,self.conv3,self.act2,self.norm2,self.conv2,self.act1,self.norm1,self.conv1)(m)
         mbs, _ ,_,_ = s.shape
         s = self.reshape(s,(mbs,2,-1))
 
